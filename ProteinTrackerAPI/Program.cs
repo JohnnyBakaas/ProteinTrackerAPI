@@ -9,7 +9,7 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         DB dataBase = new DB();
-
+        DB.ConectData();
         DB.DataDump();
 
         DB.UpdateUser(new User("john_smith", 1001, "password123", "Cutt", "male"));
@@ -36,53 +36,23 @@ internal class Program
 
         app.UseHttpsRedirection();
 
-        var summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+        app.MapGet("/users", () => new JsonResult(DB.Users))
+             .WithName("GetUsers")
+             .WithOpenApi();
 
-        app.MapGet("/weatherforecast", () =>
-        {
-            var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-                .ToArray();
-            return forecast;
-        })
-        .WithName("GetWeatherForecast")
-        .WithOpenApi();
-
-        app.MapGet("/kake", () =>
-        {
-            return new JsonResult(DB.Users);
-        })
-        .WithName("KakeTest")
-        .WithOpenApi();
 
         app.Run();
+    }
 
-        static string sha256(string randomString)
+    static string sha256(string randomString)
+    {
+        using SHA256 crypt = SHA256.Create();
+        string hash = String.Empty;
+        byte[] crypto = crypt.ComputeHash(Encoding.ASCII.GetBytes(randomString));
+        foreach (byte theByte in crypto)
         {
-            using SHA256 crypt = SHA256.Create();
-            string hash = String.Empty;
-            byte[] crypto = crypt.ComputeHash(Encoding.ASCII.GetBytes(randomString));
-            foreach (byte theByte in crypto)
-            {
-                hash += theByte.ToString("x2");
-            }
-            return hash;
+            hash += theByte.ToString("x2");
         }
-
-
+        return hash;
     }
 }
-
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
-

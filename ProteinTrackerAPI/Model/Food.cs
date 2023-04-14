@@ -2,11 +2,11 @@
 {
     public class Food
     {
-        private string _name;
-        private int _id;
-        private int _kcal;
-        private int _protein;
-        private DateTime _consumptionDateTime;
-        private int _userId;
+        public string Name { get; set; }
+        public int Id { get; set; }
+        public int Kcal { get; set; }
+        public int Protein { get; set; }
+        public DateTime ConsumptionDateTime { get; set; }
+        public int UserId { get; set; }
     }
 }

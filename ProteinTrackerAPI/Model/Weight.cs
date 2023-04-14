@@ -2,10 +2,10 @@
 {
     public class Weight
     {
-        private int _weight;
-        private int _id;
-        private string _coment;
-        private int _userId;
-        private DateTime _consumptionDateTime;
+        public int _weight { get; set; }
+        public int _id { get; set; }
+        public string _coment { get; set; }
+        public int _userId { get; set; }
+        public DateTime _consumptionDateTime { get; set; }
     }
 }

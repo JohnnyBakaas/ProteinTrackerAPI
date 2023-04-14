@@ -8,6 +8,9 @@
         public string Password { get; set; }
         public string Mode { get; set; }
         public string Gender { get; set; }
+        public List<Food> Meals { get; set; }
+        public List<Weight> Weights { get; set; }
+
 
         public User(string userName, int id, string password, string mode, string gender)
         {
@@ -16,6 +19,8 @@
             Password = password;
             Mode = mode;
             Gender = gender;
+            Meals = new List<Food>();
+            Weights = new List<Weight>();
         }
 
         public string GetUserName() { return UserName; }
@@ -24,5 +29,12 @@
             Console.WriteLine(UserName);
             Console.WriteLine(Mode);
         }
+
+
+        public void GetMeals()
+        {
+            Meals = DB.Foods.Where(obj => obj.UserId == this.Id).ToList();
+        }
+
     }
 }
