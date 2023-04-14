@@ -1,30 +1,28 @@
-﻿using System.Text.Json;
-
-namespace ProteinTrackerAPI.Model
+﻿namespace ProteinTrackerAPI.Model
 {
+    [Serializable]
     public class User
     {
-        private int _id;
-        private string _name;
-        private string _gender;
-        private string _userName;
-        private string _password;
-        private int _weight;
+        public string UserName { get; set; }
+        public int Id { get; set; }
+        public string Password { get; set; }
+        public string Mode { get; set; }
+        public string Gender { get; set; }
 
-        public List<User> MakeUserData()
+        public User(string userName, int id, string password, string mode, string gender)
         {
-            List<User> users = new List<User>();
-            users.Add(new User()
-            {
-                _id = _id,
-                _name = _name,
-                _gender = _gender,
-                _userName = _userName,
-                _password = _password,
-                _weight = _weight
-            });
-            string json = JsonSerializer.Serialize(users);
+            UserName = userName;
+            Id = id;
+            Password = password;
+            Mode = mode;
+            Gender = gender;
         }
 
+        public string GetUserName() { return UserName; }
+        public void DeBug()
+        {
+            Console.WriteLine(UserName);
+            Console.WriteLine(Mode);
+        }
     }
 }

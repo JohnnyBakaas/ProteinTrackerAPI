@@ -1,4 +1,5 @@
-using FirebaseAdmin;
+using Microsoft.AspNetCore.Mvc;
+using ProteinTrackerAPI.Model;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -6,8 +7,18 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        FirebaseApp.Create();
         var builder = WebApplication.CreateBuilder(args);
+        DB dataBase = new DB();
+
+        DB.DataDump();
+
+        DB.UpdateUser(new User("john_smith", 1001, "password123", "Cutt", "male"));
+
+        DB.DataDump();
+
+
+
+        //FirebaseApp.Create();
 
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -27,8 +38,8 @@ internal class Program
 
         var summaries = new[]
         {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+        };
 
         app.MapGet("/weatherforecast", () =>
         {
@@ -45,6 +56,13 @@ internal class Program
         .WithName("GetWeatherForecast")
         .WithOpenApi();
 
+        app.MapGet("/kake", () =>
+        {
+            return new JsonResult(DB.Users);
+        })
+        .WithName("KakeTest")
+        .WithOpenApi();
+
         app.Run();
 
         static string sha256(string randomString)
@@ -58,6 +76,8 @@ internal class Program
             }
             return hash;
         }
+
+
     }
 }
 
