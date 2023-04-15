@@ -7,6 +7,8 @@ internal class Program
 {
     private static void Main(string[] args)
     {
+
+
         var builder = WebApplication.CreateBuilder(args);
         DB dataBase = new DB();
         DB.ConectData();
@@ -16,6 +18,11 @@ internal class Program
 
         DB.DataDump();
 
+        // Aktiv ødelegging starter
+
+        Console.WriteLine(SesionToken.TokenStringToId("kake"));
+
+        // Aktiv ødelegging slutter
 
 
         //FirebaseApp.Create();
@@ -40,6 +47,64 @@ internal class Program
              .WithName("GetUsers")
              .WithOpenApi();
 
+        app.MapGet("/user", (string tokenFromClient) =>
+        {
+            Console.WriteLine("Hei!");
+            Console.WriteLine(SesionToken.TokenStringToId(tokenFromClient));
+            if (DB.Users.Any(user => user.Id == SesionToken.TokenStringToId(tokenFromClient)))
+            {
+                foreach (var user in DB.Users)
+                {
+                    if (user.Id == SesionToken.TokenStringToId(tokenFromClient)) return new JsonResult(user);
+                }
+            }
+            return new JsonResult("Ugyldig");
+        })
+             .WithName("GetUser")
+             .WithOpenApi();
+
+        app.MapGet("/login", (string userName, string password) =>
+        {
+            if (DB.Users.Any(user => user.ValidateUsernameAndPasword(userName, password)))
+            {
+                var rightUser = DB.Users.First(user => user.ValidateUsernameAndPasword(userName, password));
+                var token = new SesionToken(rightUser.Id);
+                Console.WriteLine(token.TokenString);
+                return new JsonResult(token);
+            }
+            return new JsonResult(null);
+        }).WithName("GetLogin")
+             .WithOpenApi();
+
+        app.MapPost("/addFood", (Food newFood, string tokenFromClient) =>
+        {
+            if (newFood.Id != SesionToken.TokenStringToId(tokenFromClient)) return Results.BadRequest("Invalid token.");
+            if (newFood == null)
+            {
+                return Results.BadRequest("Invalid food object.");
+            }
+
+            DB.AddFood(new Food(newFood.Name, newFood.Kcal, newFood.Protein, newFood.ConsumptionDateTime, newFood.UserId));
+            DB.ConectData();
+            return Results.Ok("Food added successfully.");
+        })
+            .WithName("AddFood")
+            .WithOpenApi();
+
+
+        app.MapPost("/addWeight", (string weight, string coment, string tokenFromClient) =>
+        {
+            try
+            {
+                //(int waight, string coment, int userId, DateTime weightDateTime
+                DB.AddWeight(new Weight(int.Parse(weight), coment, SesionToken.TokenStringToId(tokenFromClient), DateTime.Now));
+                DB.ConectData();
+            }
+            catch (Exception ex) { Console.WriteLine(ex); }
+        })
+            .WithName("addWeight")
+            .WithOpenApi();
+
 
         app.Run();
     }
@@ -56,3 +121,18 @@ internal class Program
         return hash;
     }
 }
+
+/*
+    Sesion tokens plan:
+        Klient lagrer Token i local storage
+        Server lagrer Token i RAM
+
+    Log in sekvens
+        Klient sender inn bruker navn og passord til server
+        Server sjekker bruker navn og passord opp mot DB
+        Hvis brukernavn eller passord er feil
+            Send "Feil passord" til klient
+        Hvis alt stemmer lagres en token i server ram
+        Server sender TOKEN til klient
+        Klient sender TOKEN til server ved alle sequests til server
+ */

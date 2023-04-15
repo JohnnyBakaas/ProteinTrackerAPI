@@ -36,5 +36,16 @@
             Meals = DB.Foods.Where(obj => obj.UserId == this.Id).ToList();
         }
 
+        public void GetWeights()
+        {
+            Weights = DB.Weights.Where(obj => obj.UserId == this.Id).ToList();
+        }
+
+        public bool ValidateUsernameAndPasword(string userName, string password)
+        {
+            if (UserName == userName && Password == password) return true;
+            return false;
+        }
+
     }
 }

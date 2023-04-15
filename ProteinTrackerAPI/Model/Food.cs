@@ -8,5 +8,18 @@
         public int Protein { get; set; }
         public DateTime ConsumptionDateTime { get; set; }
         public int UserId { get; set; }
+
+        private static int _lastId = 0;
+
+        public Food(string name, int kcal, int protein, DateTime consumptionDateTime, int userId)
+        {
+            Name = name;
+            Id = _lastId;
+            Kcal = kcal;
+            Protein = protein;
+            ConsumptionDateTime = consumptionDateTime;
+            UserId = userId;
+            _lastId++;
+        }
     }
 }

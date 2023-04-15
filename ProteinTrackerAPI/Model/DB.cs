@@ -16,49 +16,22 @@
                 Foods = new();
                 Weights = new();
 
-                Users.Add(new User("john_smith", 1, "password123", "admin", "male"));
+                Users.Add(new User("test", 1, "test", "admin", "male"));
                 Users.Add(new User("jane_doe", 2, "testpassword", "user", "female"));
                 Users.Add(new User("bob_johnson", 3, "ilovecoding", "user", "male"));
 
-                Foods.Add(new Food
-                {
-                    Name = "Apple",
-                    Id = 1,
-                    Kcal = 95,
-                    Protein = 1,
-                    ConsumptionDateTime = new DateTime(2023, 4, 14, 12, 0, 0),
-                    UserId = 1
-                });
+                Foods.Add(new Food("Apple", 95, 1, new DateTime(2023, 4, 14, 12, 0, 0), 1));
+                Foods.Add(new Food("Banana", 105, 1, new DateTime(2023, 4, 14, 12, 30, 0), 1));
+                Foods.Add(new Food("Grilled Chicken", 180, 26, new DateTime(2023, 4, 14, 19, 0, 0), 1));
+                Foods.Add(new Food("Salmon", 207, 23, new DateTime(2023, 4, 14, 20, 0, 0), 2));
 
-                Foods.Add(new Food
-                {
-                    Name = "Banana",
-                    Id = 2,
-                    Kcal = 105,
-                    Protein = 1,
-                    ConsumptionDateTime = new DateTime(2023, 4, 14, 12, 30, 0),
-                    UserId = 1
-                });
+                Weights.Add(new Weight(170, "Starting weight", 1, new DateTime(2023, 4, 10, 10, 0, 0)));
+                Weights.Add(new Weight(168, "Lost 2 pounds", 1, new DateTime(2023, 4, 11, 10, 0, 0)));
+                Weights.Add(new Weight(166, "Lost another 2 pounds", 1, new DateTime(2023, 4, 12, 10, 0, 0)));
+                Weights.Add(new Weight(165, "Lost 1 pound", 1, new DateTime(2023, 4, 13, 10, 0, 0)));
+                Weights.Add(new Weight(164, "Lost 1 more pound", 1, new DateTime(2023, 4, 14, 10, 0, 0)));
 
-                Foods.Add(new Food
-                {
-                    Name = "Grilled Chicken",
-                    Id = 3,
-                    Kcal = 180,
-                    Protein = 26,
-                    ConsumptionDateTime = new DateTime(2023, 4, 14, 19, 0, 0),
-                    UserId = 1
-                });
 
-                Foods.Add(new Food
-                {
-                    Name = "Salmon",
-                    Id = 4,
-                    Kcal = 207,
-                    Protein = 23,
-                    ConsumptionDateTime = new DateTime(2023, 4, 14, 20, 0, 0),
-                    UserId = 2
-                });
 
             }
         }
@@ -105,7 +78,7 @@
 
         public static void ConectData()
         {
-            Users.ForEach(x => x.GetMeals());
+            Users.ForEach(x => { x.GetMeals(); x.GetWeights(); });
         }
     }
 }
