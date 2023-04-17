@@ -5,16 +5,16 @@ using System.Text;
 
 internal class Program
 {
+
     private static void Main(string[] args)
     {
-
-
         var builder = WebApplication.CreateBuilder(args);
+
         DB dataBase = new DB();
         DB.ConectData();
         DB.DataDump();
 
-        DB.UpdateUser(new User("john_smith", 1001, "password123", "Cutt", "male"));
+        DB.UpdateUser(new User("john_smith", 1001, "password123", -5, "male"));
 
         DB.DataDump();
 
@@ -29,6 +29,17 @@ internal class Program
 
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAllOrigins",
+                builder =>
+                {
+                    builder
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                });
+        });
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
@@ -43,13 +54,16 @@ internal class Program
 
         app.UseHttpsRedirection();
 
+        app.UseCors("AllowAllOrigins");
+
+
         app.MapGet("/users", () => new JsonResult(DB.Users))
              .WithName("GetUsers")
              .WithOpenApi();
 
         app.MapGet("/user", (string tokenFromClient) =>
         {
-            Console.WriteLine("Hei!");
+            Console.WriteLine(tokenFromClient);
             Console.WriteLine(SesionToken.TokenStringToId(tokenFromClient));
             if (DB.Users.Any(user => user.Id == SesionToken.TokenStringToId(tokenFromClient)))
             {
@@ -78,11 +92,12 @@ internal class Program
 
         app.MapPost("/addFood", (Food newFood, string tokenFromClient) =>
         {
-            if (newFood.Id != SesionToken.TokenStringToId(tokenFromClient)) return Results.BadRequest("Invalid token.");
-            if (newFood == null)
-            {
-                return Results.BadRequest("Invalid food object.");
-            }
+            Console.WriteLine();
+            Console.WriteLine("Token from client");
+            Console.WriteLine(tokenFromClient);
+            Console.WriteLine("--------------------");
+            if (newFood.UserId != SesionToken.TokenStringToId(tokenFromClient)) return Results.BadRequest("Invalid token.");
+            if (newFood == null) return Results.BadRequest("Invalid food object.");
 
             DB.AddFood(new Food(newFood.Name, newFood.Kcal, newFood.Protein, newFood.ConsumptionDateTime, newFood.UserId));
             DB.ConectData();
@@ -96,7 +111,6 @@ internal class Program
         {
             try
             {
-                //(int waight, string coment, int userId, DateTime weightDateTime
                 DB.AddWeight(new Weight(int.Parse(weight), coment, SesionToken.TokenStringToId(tokenFromClient), DateTime.Now));
                 DB.ConectData();
             }
@@ -104,6 +118,8 @@ internal class Program
         })
             .WithName("addWeight")
             .WithOpenApi();
+
+
 
 
         app.Run();

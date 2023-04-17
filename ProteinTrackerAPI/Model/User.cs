@@ -5,19 +5,19 @@
     {
         public string UserName { get; set; }
         public int Id { get; set; }
-        public string Password { get; set; }
-        public string Mode { get; set; }
+        private string Password { get; set; }
+        public int KcalDelta { get; set; }
         public string Gender { get; set; }
         public List<Food> Meals { get; set; }
         public List<Weight> Weights { get; set; }
 
 
-        public User(string userName, int id, string password, string mode, string gender)
+        public User(string userName, int id, string password, int delta, string gender)
         {
             UserName = userName;
             Id = id;
             Password = password;
-            Mode = mode;
+            KcalDelta = delta;
             Gender = gender;
             Meals = new List<Food>();
             Weights = new List<Weight>();
@@ -27,7 +27,7 @@
         public void DeBug()
         {
             Console.WriteLine(UserName);
-            Console.WriteLine(Mode);
+            Console.WriteLine(KcalDelta);
         }
 
 
