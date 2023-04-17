@@ -20,10 +20,10 @@
                 Users.Add(new User("jane_doe", 2, "testpassword", -500, "female"));
                 Users.Add(new User("bob_johnson", 3, "ilovecoding", -500, "male"));
 
-                Foods.Add(new Food("Apple", 95, 1, new DateTime(2023, 4, 17, 12, 0, 0), 1));
-                Foods.Add(new Food("Banana", 105, 1, new DateTime(2023, 4, 17, 12, 30, 0), 1));
-                Foods.Add(new Food("Grilled Chicken", 180, 26, new DateTime(2023, 4, 17, 19, 0, 0), 1));
-                Foods.Add(new Food("Salmon", 207, 23, new DateTime(2023, 4, 17, 20, 0, 0), 2));
+                Foods.Add(new Food("Apple", 95, 1, new DateTime(2023, 4, 18, 12, 0, 0), 1));
+                Foods.Add(new Food("Banana", 105, 1, new DateTime(2023, 4, 18, 12, 30, 0), 1));
+                Foods.Add(new Food("Grilled Chicken", 180, 26, new DateTime(2023, 4, 18, 19, 0, 0), 1));
+                Foods.Add(new Food("Salmon", 207, 23, new DateTime(2023, 4, 18, 20, 0, 0), 2));
 
                 Weights.Add(new Weight(170, "Starting weight", 1, new DateTime(2023, 4, 10, 10, 0, 0)));
                 Weights.Add(new Weight(168, "Lost 2 pounds", 1, new DateTime(2023, 4, 11, 10, 0, 0)));

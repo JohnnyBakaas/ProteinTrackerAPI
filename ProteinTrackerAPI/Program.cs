@@ -106,7 +106,6 @@ internal class Program
             .WithName("AddFood")
             .WithOpenApi();
 
-
         app.MapPost("/addWeight", (string weight, string coment, string tokenFromClient) =>
         {
             try
@@ -119,6 +118,19 @@ internal class Program
             .WithName("addWeight")
             .WithOpenApi();
 
+        app.MapPost("/updateUser", (string token, User user) =>
+        {
+            try
+            {
+                if (user.Id == SesionToken.TokenStringToId(token))
+                {
+                    DB.UpdateUser(user);
+                    DB.ConectData();
+                }
+            }
+            catch (Exception ex) { Console.WriteLine(ex); };
+        })
+            .WithOpenApi();
 
 
 
