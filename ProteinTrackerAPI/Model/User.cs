@@ -31,12 +31,12 @@
         }
 
 
-        public void GetMeals()
+        public void ConectMeals()
         {
             Meals = DB.Foods.Where(obj => obj.UserId == this.Id).ToList();
         }
 
-        public void GetWeights()
+        public void ConectWeights()
         {
             Weights = DB.Weights.Where(obj => obj.UserId == this.Id).ToList();
         }

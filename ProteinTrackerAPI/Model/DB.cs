@@ -78,7 +78,7 @@
 
         public static void ConectData()
         {
-            Users.ForEach(x => { x.GetMeals(); x.GetWeights(); });
+            Users.ForEach(x => { x.ConectMeals(); x.ConectWeights(); });
         }
     }
 }
