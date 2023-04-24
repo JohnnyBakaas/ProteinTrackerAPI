@@ -8,15 +8,28 @@ internal class Program
 
     private static void Main(string[] args)
     {
+        /*
+        // Kobler til MySQL
+        string connectionString = "server=localhost;port=3306;user=root;password=;database=protein_app";
+        using MySqlConnection connection = new MySqlConnection(connectionString);
+        connection.Open();
+        // Koblet til MySQL
+
+        string query = "SELECT * FROM users";
+
+        using MySqlCommand command = new MySqlCommand(query, connection);
+        using MySqlDataReader reader = command.ExecuteReader();
+
+        while (reader.Read())
+        {
+            Console.WriteLine($"{reader["column1"]} - {reader["column2"]}");
+        }
+        */
+
+        DB.ConectDBToMySQL();
+        DB.LoginUser("Johnny", "admin");
+
         var builder = WebApplication.CreateBuilder(args);
-
-        DB dataBase = new DB();
-        DB.ConectData();
-        DB.DataDump();
-
-        DB.UpdateUser(new User("john_smith", 1001, "password123", -5, "male"));
-
-        DB.DataDump();
 
         builder.Services.AddCors(options =>
         {
@@ -55,15 +68,16 @@ internal class Program
 
         app.MapGet("/user", (string tokenFromClient) =>
         {
-            Console.WriteLine(tokenFromClient);
-            int userId = SessionToken.TokenStringToId(tokenFromClient);
+            DB.ConectData();
+            Console.WriteLine("/user: " + tokenFromClient);
 
-            if (userId == -1)
+            var user = DB.GetUserFromToken(tokenFromClient);
+
+            if (user == null)
             {
                 return new JsonResult("Ugyldig");
             }
 
-            var user = DB.Users.FirstOrDefault(u => u.Id == userId);
             return new JsonResult(user);
         })
             .WithName("GetUser")
@@ -72,7 +86,7 @@ internal class Program
 
         app.MapGet("/login", (string userName, string password) =>
         {
-            var rightUser = DB.Users.FirstOrDefault(user => user.ValidateUsernameAndPasword(userName, password));
+            var rightUser = DB.LoginUser(userName, password);
 
             if (rightUser != null)
             {
@@ -95,12 +109,13 @@ internal class Program
             }
             if (newFood == null)
             {
-
                 return Results.BadRequest("Invalid food object.");
             }
 
-            DB.AddFood(new Food(newFood.Name, newFood.Kcal, newFood.Protein, newFood.ConsumptionDateTime, newFood.UserId));
-            DB.ConectData();
+            DB.AddFoodToSQL(newFood);
+
+            // Endre kode under
+
             return Results.Ok("Food added successfully.");
         })
             .WithName("AddFood")
@@ -111,8 +126,7 @@ internal class Program
         {
             try
             {
-                DB.AddWeight(new Weight(int.Parse(weight), coment, SessionToken.TokenStringToId(tokenFromClient), DateTime.Now));
-                DB.ConectData();
+                DB.AddWeightToSQL(weight, coment, tokenFromClient);
             }
             catch (Exception ex) { Console.WriteLine(ex); }
         })
@@ -120,17 +134,10 @@ internal class Program
             .WithOpenApi();
 
 
-        app.MapPost("/updateUser", (string token, User user) =>
+        app.MapPost("/updateUser", (string token, int KcalDelta) =>
         {
-            try
-            {
-                if (user.Id == SessionToken.TokenStringToId(token))
-                {
-                    DB.UpdateUser(user);
-                    DB.ConectData();
-                }
-            }
-            catch (Exception ex) { Console.WriteLine(ex); };
+            Console.WriteLine($"Prøver å oppdatere bruker - {token}");
+            DB.UpdateKcalDeltaInSQL(KcalDelta, token);
         })
             .WithOpenApi();
 

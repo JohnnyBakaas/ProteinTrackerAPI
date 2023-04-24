@@ -1,40 +1,161 @@
-﻿namespace ProteinTrackerAPI.Model
+﻿using MySqlConnector;
+using System.Globalization;
+
+namespace ProteinTrackerAPI.Model
 {
-    public class DB
+    public static class DB
     {
-        public static List<User> Users;
-        public static List<Food> Foods;
-        public static List<Weight> Weights;
-        private static bool _used = false;
+        public static List<User> Users = new List<User>();
+        public static List<Food> Foods = new List<Food>();
+        public static List<Weight> Weights = new List<Weight>();
 
-        public DB()
+        public static MySqlConnection connection;
+
+        public static void ConectDBToMySQL()
         {
-            if (!_used)
+            string connectionString = "server=localhost;port=3306;user=root;password=;database=protein_app";
+            connection = new MySqlConnection(connectionString);
+            connection.Open();
+
+            // TESTER VIDRE UNDER
+            string query = "SELECT * FROM users";
+
+            using MySqlCommand command = new MySqlCommand(query, connection);
+            using MySqlDataReader reader = command.ExecuteReader();
+
+            while (reader.Read())
             {
-                _used = true;
-                Users = new();
-                Foods = new();
-                Weights = new();
-
-                Users.Add(new User("test", 1, "test", -500, "male"));
-                Users.Add(new User("jane_doe", 2, "testpassword", -500, "female"));
-                Users.Add(new User("bob_johnson", 3, "ilovecoding", -500, "male"));
-
-                Foods.Add(new Food("Apple", 95, 1, new DateTime(2023, 4, 18, 12, 0, 0), 1));
-                Foods.Add(new Food("Banana", 105, 1, new DateTime(2023, 4, 18, 12, 30, 0), 1));
-                Foods.Add(new Food("Grilled Chicken", 180, 26, new DateTime(2023, 4, 18, 19, 0, 0), 1));
-                Foods.Add(new Food("Salmon", 207, 23, new DateTime(2023, 4, 18, 20, 0, 0), 2));
-
-                Weights.Add(new Weight(170, "Starting weight", 1, new DateTime(2023, 4, 10, 10, 0, 0)));
-                Weights.Add(new Weight(168, "Lost 2 pounds", 1, new DateTime(2023, 4, 11, 10, 0, 0)));
-                Weights.Add(new Weight(166, "Lost another 2 pounds", 1, new DateTime(2023, 4, 12, 10, 0, 0)));
-                Weights.Add(new Weight(165, "Lost 1 pound", 1, new DateTime(2023, 4, 13, 10, 0, 0)));
-                Weights.Add(new Weight(110, "Lost 1 more pound", 1, new DateTime(2023, 4, 14, 10, 0, 0)));
-
-
-
+                Console.WriteLine($"{reader["UserName"]} - {reader["KcalDelta"]}");
             }
         }
+
+        public static User LoginUser(string userName, string pasword)
+        {
+            string query = $"SELECT * FROM `users` WHERE `UserName` LIKE '{userName}' AND `Pasword` LIKE '{pasword}'";
+
+            using MySqlCommand command = new MySqlCommand(query, connection);
+            using MySqlDataReader reader = command.ExecuteReader();
+
+            User foundUser = null;
+
+            while (reader.Read())
+            {
+                Console.WriteLine($"{reader["UserName"]} - {reader["KcalDelta"]} - It's me you are looking fore");
+                foundUser = new User(
+                        reader["UserName"].ToString(),
+                        int.Parse(reader["Id"].ToString()),
+                        reader["Pasword"].ToString(),
+                        reader["KcalDelta"].ToString() == "" ?
+                            0
+                            :
+                            int.Parse(reader["KcalDelta"].ToString()),
+                        reader["Gender"].ToString()
+                        );
+            };
+
+            return foundUser;
+        }
+
+        public static User GetUserFromToken(string token)
+        {
+            User foundUser = null;
+
+            string query = $"SELECT * FROM `users` WHERE `Id` LIKE '{SessionToken.TokenStringToId(token)}'";
+            using MySqlCommand command = new MySqlCommand(query, connection);
+            using MySqlDataReader reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                Console.WriteLine($"{reader["UserName"]} - {reader["KcalDelta"]} - It's me you are looking fore");
+                foundUser = new User
+                    (
+                        reader["UserName"].ToString(),
+                        int.Parse(reader["Id"].ToString()),
+                        reader["Pasword"].ToString(),
+                        reader["KcalDelta"].ToString() == "" ?
+                            0
+                            :
+                            int.Parse(reader["KcalDelta"].ToString()),
+                        reader["Gender"].ToString()
+                    );
+            };
+            reader.DisposeAsync();
+
+            if (foundUser != null)
+            {
+                ConectFoodsToUser(foundUser);
+                ConectWeightsToUser(foundUser);
+            }
+
+            return foundUser;
+        }
+
+        private static void ConectFoodsToUser(User user)
+        {
+            string foodQuery = $"SELECT * FROM `food` WHERE `UserId` = {user.Id}";
+            using MySqlCommand foodCommand = new MySqlCommand(foodQuery, connection);
+            using MySqlDataReader foodReader = foodCommand.ExecuteReader();
+            while (foodReader.Read())
+            {
+                user.Meals.Add(new Food
+                    (
+                        foodReader["Name"].ToString(),
+                        int.Parse(foodReader["Kcal"].ToString()),
+                        int.Parse(foodReader["Protein"].ToString()),
+                        DateTime.ParseExact(foodReader["ConsumptionDateTime"].ToString(), "dd.MM.yyyy HH.mm.ss", CultureInfo.InvariantCulture),
+                        int.Parse(foodReader["UserId"].ToString())
+                    ));
+            }
+            foodReader.Dispose();
+        }
+
+        private static void ConectWeightsToUser(User user)
+        {
+            string weightQuery = $"SELECT * FROM `weight` WHERE `UserId` = {user.Id}";
+            using MySqlCommand weightCommand = new MySqlCommand(weightQuery, connection);
+            using MySqlDataReader weightReader = weightCommand.ExecuteReader();
+            while (weightReader.Read())
+            {
+                user.Weights.Add(new Weight
+                    (
+                        int.Parse(weightReader["MeshuredWeight"].ToString()),
+                        weightReader["Coment"].ToString(),
+                        int.Parse(weightReader["UserId"].ToString()),
+                        DateTime.ParseExact(weightReader["WeightDateTime"].ToString(), "dd.MM.yyyy HH.mm.ss", CultureInfo.InvariantCulture)
+                    ));
+            }
+            weightReader.Dispose();
+        }
+
+        public static void AddFoodToSQL(Food food)
+        {
+            string query = @$"INSERT INTO `food` (`Id`, `Name`, `Kcal`, `Protein`, `ConsumptionDateTime`, `UserId`) VALUES 
+        (NULL, '{food.Name}', '{food.Kcal}', '{food.Protein}', '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', '{food.UserId}')";
+
+            using MySqlCommand command = new MySqlCommand(query, connection);
+            command.ExecuteNonQuery();
+        }
+
+        public static void AddWeightToSQL(string weight, string coment, string tokenFromClient)
+        {
+            string query = $@"INSERT INTO `weight` (`Id`, `UserId`, `MeshuredWeight`, `Coment`, `WeightDateTime`) VALUES 
+        (NULL, '{SessionToken.TokenStringToId(tokenFromClient)}', '{weight}', '{coment}', '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}')";
+
+            using MySqlCommand command = new MySqlCommand(query, connection);
+            command.ExecuteNonQuery();
+        }
+
+        public static void UpdateKcalDeltaInSQL(int delta, string tokenFromClient)
+        {
+            if (SessionToken.TokenStringToId(tokenFromClient) != -1)
+            {
+                string query = $"UPDATE `users` SET `KcalDelta` = '{delta}' WHERE `users`.`Id` = {SessionToken.TokenStringToId(tokenFromClient)}";
+                using MySqlCommand command = new MySqlCommand(query, connection);
+                command.ExecuteNonQuery();
+            }
+        }
+
+        // Gammel kode↓
 
         public static void DataDump()
         {
@@ -50,6 +171,8 @@
 
         public static void UpdateUser(User inputUser)
         {
+
+
             bool newUser = true;
             for (int i = 0; i < Users.Count; i++)
             {
@@ -66,6 +189,16 @@
             }
         }
 
+        public static void UpdateKcalDelta(int id, int delta)
+        {
+            try
+            {
+                DB.Users.First(e => e.Id == id).KcalDelta = delta;
+
+            }
+            catch { Console.WriteLine("UpdateKcalDelta has faild"); }
+        }
+
         public static void AddFood(Food newFood)
         {
             Foods.Add(newFood);
@@ -78,6 +211,29 @@
 
         public static void ConectData()
         {
+            // Du er dum, hent heller bare brukere individuelt, ikke være en jævla dipshit, vi trenger faktisk ikke å ha hele databasen i minne....
+            string query = "SELECT * FROM users";
+
+            using MySqlCommand command = new MySqlCommand(query, connection);
+            using MySqlDataReader reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                Users.Add(
+                    new User(
+                        reader["UserName"].ToString(),
+                        int.Parse(reader["Id"].ToString()),
+                        reader["Pasword"].ToString(),
+                        reader["KcalDelta"].ToString() == "" ?
+                            0
+                            :
+                            int.Parse(reader["KcalDelta"].ToString()),
+                        reader["Gender"].ToString()
+                        )
+                    );
+                Console.WriteLine($"{reader["UserName"]} - {reader["KcalDelta"]}");
+            }
+
             Users.ForEach(x => { x.ConectMeals(); x.ConectWeights(); });
         }
     }

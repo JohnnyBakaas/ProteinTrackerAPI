@@ -40,21 +40,11 @@
                 var foundToken = _tokenList.FirstOrDefault(T => T.TokenString == tokenString);
                 if (foundToken != null)
                 {
-                    Console.WriteLine("--------------------------------------");
-                    Console.WriteLine();
-                    Console.WriteLine($"Token from client {tokenString}");
-                    Console.WriteLine($"Alle =>");
-                    _tokenList.ForEach(e => Console.WriteLine(e.TokenString));
-                    Console.WriteLine();
-
-                    Console.WriteLine($"Token found: {foundToken.TokenString}");
-                    Console.WriteLine($"Associated user ID: {foundToken._userId}");
-                    Console.WriteLine("--------------------------------------");
                     return foundToken._userId;
                 }
                 else
                 {
-                    Console.WriteLine("Token not found in _tokenList");
+
                     return -1;
                 }
             }
