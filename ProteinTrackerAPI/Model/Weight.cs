@@ -2,7 +2,7 @@
 {
     public class Weight
     {
-        public int MeshuredWeight { get; set; }
+        public decimal MeshuredWeight { get; set; }
         public int Id { get; set; }
         public string Coment { get; set; }
         public int UserId { get; set; }
@@ -10,7 +10,7 @@
 
         private static int _lastId = 0;
 
-        public Weight(int waight, string coment, int userId, DateTime weightDateTime)
+        public Weight(decimal waight, string coment, int userId, DateTime weightDateTime)
         {
             _lastId++;
             Coment = coment;

@@ -139,9 +139,8 @@ internal class Program
             Console.WriteLine($"Prøver å oppdatere bruker - {token}");
             DB.UpdateKcalDeltaInSQL(KcalDelta, token);
         })
+            .WithName("updateUser")
             .WithOpenApi();
-
-
 
         app.Run();
     }

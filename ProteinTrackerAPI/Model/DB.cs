@@ -118,7 +118,7 @@ namespace ProteinTrackerAPI.Model
             {
                 user.Weights.Add(new Weight
                     (
-                        int.Parse(weightReader["MeshuredWeight"].ToString()),
+                        Convert.ToDecimal(weightReader["MeshuredWeight"].ToString()),
                         weightReader["Coment"].ToString(),
                         int.Parse(weightReader["UserId"].ToString()),
                         DateTime.ParseExact(weightReader["WeightDateTime"].ToString(), "dd.MM.yyyy HH.mm.ss", CultureInfo.InvariantCulture)
