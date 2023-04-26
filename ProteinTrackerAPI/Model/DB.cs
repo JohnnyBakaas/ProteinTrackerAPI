@@ -211,7 +211,7 @@ namespace ProteinTrackerAPI.Model
 
         public static void ConectData()
         {
-            // Du er dum, hent heller bare brukere individuelt, ikke være en jævla dipshit, vi trenger faktisk ikke å ha hele databasen i minne....
+
             string query = "SELECT * FROM users";
 
             using MySqlCommand command = new MySqlCommand(query, connection);
@@ -233,6 +233,7 @@ namespace ProteinTrackerAPI.Model
                     );
                 Console.WriteLine($"{reader["UserName"]} - {reader["KcalDelta"]}");
             }
+
 
             Users.ForEach(x => { x.ConectMeals(); x.ConectWeights(); });
         }
